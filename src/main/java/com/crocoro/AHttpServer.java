@@ -47,7 +47,6 @@ public class AHttpServer {
 
     public void init() throws IOException {
         System.setProperty("file.encoding", "UTF-8");
-        System.out.println(new File("lib/").getAbsolutePath());
         System.setProperty("java.library.path", new File("lib/").getAbsolutePath());
 
         sigar = new Sigar();
