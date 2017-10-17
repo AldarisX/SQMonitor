@@ -41,26 +41,31 @@ public class AUpTime {
     }
 
     public String getUptime() {
-        double uptime = this.uptime.getUptime();
-        String retval = "";
+        try {
+            double uptime = sigar.getUptime().getUptime();
+            String retval = "";
 
-        int days = (int) uptime / (60 * 60 * 24);
-        int minutes, hours;
+            int days = (int) uptime / (60 * 60 * 24);
+            int minutes, hours;
 
-        if (days != 0) {
-            retval += days + " " + ((days > 1) ? "days" : "天") + ", ";
+            if (days != 0) {
+                retval += days + " " + ((days > 1) ? "days" : "天") + ", ";
+            }
+
+            minutes = (int) uptime / 60;
+            hours = minutes / 60;
+            hours %= 24;
+            minutes %= 60;
+
+            if (hours != 0) {
+                retval += hours + "小时:" + minutes + "分钟";
+            } else {
+                retval += minutes + " 分钟";
+            }
+            return retval;
+        } catch (SigarException e) {
+            e.printStackTrace();
+            return "发生异常";
         }
-
-        minutes = (int) uptime / 60;
-        hours = minutes / 60;
-        hours %= 24;
-        minutes %= 60;
-
-        if (hours != 0) {
-            retval += hours + "小时:" + minutes + "分钟";
-        } else {
-            retval += minutes + " 分钟";
-        }
-        return retval;
     }
 }
