@@ -41,8 +41,11 @@
                 <version>3.0.0</version>
                 <configuration>
                     <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
                         <manifest>
                             <mainClass>com.crocoro.AHttpServer</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                         <manifestEntries>
                             <Built-By>Aldaris</Built-By>
@@ -80,5 +83,6 @@
             <artifactId>sigar</artifactId>
             <version>1.6.4</version>
         </dependency>
+
     </dependencies>
 </project>
