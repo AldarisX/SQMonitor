@@ -88,7 +88,7 @@ public class StatusHandler implements HttpHandler {
             result.accumulate("cpuModel", cpu.getModel());
 
             GZIPOutputStream gzip = new GZIPOutputStream(os);
-            gzip.write(result.toString().getBytes());
+            gzip.write(result.toString().getBytes("UTF-8"));
             gzip.close();
             os.close();
         } catch (ExportException e) {
@@ -108,7 +108,7 @@ public class StatusHandler implements HttpHandler {
             result.accumulate("Uptime", upTime.getStatus());
 
             GZIPOutputStream gzip = new GZIPOutputStream(os);
-            gzip.write(result.toString().getBytes());
+            gzip.write(result.toString().getBytes("UTF-8"));
             gzip.close();
             os.close();
         } catch (Exception e) {

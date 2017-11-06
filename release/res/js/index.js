@@ -21,15 +21,23 @@ function dynStart() {
         timeout: 5000,    //超时时间
         dataType: 'json',
         success: function (data, textStatus, jqXHR) {
-            // $.get("api?passwd=" + passwd + "&command=dyn", function (data) {
-//                console.log(data);
-            $("#cpuUseage").html((100 - (data.cpuIdle * 100)).toFixed(2) + "%");
-            $("#loadAvg").html(data.loadAvg);
-            $("#upTime").html(data.upTime);
-            $("#memUsed .value").html((data.usedMem / 1024 / 1024).toFixed(2) + "MB");
-            $("#memFree .value").html((data.freeMem / 1024 / 1024).toFixed(2) + "MB");
-            var rx = data.rx;
-            var tx = data.tx;
+            var uptime = data.Uptime;
+            var cpu = data.CPU;
+            var mem = data.Mem;
+            var swap = data.Swap;
+            var net = data.Net;
+            var disk = data.Disk;
+
+            $("#cpuUseage").html((100 - (cpu.idle * 100)).toFixed(2) + "%");
+            $("#loadAvg").html(uptime.loadAvg);
+            $("#upTime").html(uptime.upTime);
+            $("#memUsed .value").html((mem.used / 1024 / 1024).toFixed(2) + "MB");
+            $("#memFree .value").html((mem.free / 1024 / 1024).toFixed(2) + "MB");
+            $("#memUsage .value").html(mem.usage.toFixed(3) + "%");
+            $("#swapUsed .value").html((swap.used / 1024 / 1024).toFixed(2) + "MB");
+            $("#swapFree .value").html((swap.free / 1024 / 1024).toFixed(2) + "MB");
+            var rx = net.rx;
+            var tx = net.tx;
             var rxNetStatus = "KB/s";
             var txNetStatus = "KB/s";
             if (rx > 1024) {
@@ -44,12 +52,11 @@ function dynStart() {
             $("#tx .value").html(tx.toFixed(3) + txNetStatus);
 
             $("#diskList .info").html("");
-            for (var i = 0; i < data.diskList.length; i++) {
-                var diskInfo = data.diskList[i];
+            for (var i = 0; i < disk.length; i++) {
+                var diskInfo = disk[i];
                 $("#diskList .info").append("<div>" + diskInfo.name + " 读取:" + parseFloat(diskInfo.read).toFixed(2) + "MB/s 写入:" + parseFloat(diskInfo.write).toFixed(2) + "MB/s 磁盘使用:" + diskInfo.usage + "</div>");
             }
             setTimeout(dynStart, 1000);
-            // });
         },
         error: function (xhr, textStatus) {
             $("#btn_Start").attr("disabled", false);
@@ -59,7 +66,6 @@ function dynStart() {
 
 function infoStart() {
     $.get("api?passwd=" + passwd + "&command=info", function (data) {
-        // console.log(data);
         $("#cpuModel").html(data.cpuModel);
     });
 }

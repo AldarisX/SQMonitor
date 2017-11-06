@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>监控</title>
     <script src="js/jquery-3.2.1.min.js"></script>
-    <script src="js/index.js"></script>
+    <script src="js/index.min.js"></script>
 </head>
 <body>
 <div id="sysInfo">
@@ -29,6 +29,15 @@
 <div id="memFree">
     <span>物理内存剩余:</span><span class="value"></span>
 </div>
+<div id="memUsage">
+    <span>物理内存使用率:</span><span class="value"></span>
+</div>
+<div id="swapUsed">
+    <span>虚拟内存使用:</span><span class="value"></span>
+</div>
+<div id="swapFree">
+    <span>虚拟内存剩余:</span><span class="value"></span>
+</div>
 <div id="rx">
     <span>下载:</span><span class="value"></span>
 </div>
@@ -45,7 +54,7 @@
 <div>
     <div>
         <span>密码</span><input id="passwd" type="text" placeholder="输入密码">
-        <button onclick="start()">开始</button>
+        <button id="btn_Start" onclick="start()">开始</button>
     </div>
 </div>
 </body>
