@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Date;
+import java.util.zip.GZIPOutputStream;
 
 public class FileHandler implements HttpHandler {
     private File file;
@@ -32,11 +33,13 @@ public class FileHandler implements HttpHandler {
     public void handle(HttpExchange http) throws IOException {
         Headers headers = http.getResponseHeaders();
         headers.add("Content-Type", contentType + "; charset=utf-8");
+        headers.add("Content-Encoding", "gzip");
         headers.add("Last-modified", lastModified);
         headers.add("Server", "Sun HttpServer");
         http.sendResponseHeaders(200, 0);
 
         OutputStream os = http.getResponseBody();
+        GZIPOutputStream gzip = new GZIPOutputStream(os);
         FileChannel inFC = new RandomAccessFile(file.getAbsoluteFile(), "r").getChannel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
 
@@ -44,12 +47,13 @@ public class FileHandler implements HttpHandler {
         while (bytesRead != -1) {
             buffer.flip();
             while (buffer.hasRemaining()) {
-                os.write(buffer.get());
+                gzip.write(buffer.get());
             }
             buffer.clear();
             bytesRead = inFC.read(buffer);
         }
 
+        gzip.close();
         os.close();
     }
 

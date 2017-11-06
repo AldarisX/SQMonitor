@@ -1,5 +1,7 @@
 package com.crocoro.monitor;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.hyperic.sigar.FileSystem;
 import org.hyperic.sigar.FileSystemUsage;
 import org.hyperic.sigar.Sigar;
@@ -10,7 +12,7 @@ import java.util.Set;
 
 import static java.lang.Thread.sleep;
 
-public class Disk {
+public class Disk extends Hardware {
     static int span = 999;
     Sigar sigar;
 
@@ -86,5 +88,20 @@ public class Disk {
                 }
             }
         }).start();
+    }
+
+    @Override
+    public JSONArray getStatus() {
+        JSONArray result = new JSONArray();
+        Set<String> diskList = getDiskList();
+        for (String diskName : diskList) {
+            JSONObject disk = new JSONObject();
+            disk.accumulate("name", diskName);
+            disk.accumulate("read", getRead(diskName));
+            disk.accumulate("write", getWrite(diskName));
+            disk.accumulate("usage", getUsage(diskName));
+            result.add(disk);
+        }
+        return result;
     }
 }

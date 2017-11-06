@@ -1,12 +1,13 @@
 package com.crocoro.monitor;
 
+import net.sf.json.JSONObject;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarNotImplementedException;
 import org.hyperic.sigar.Uptime;
 import org.hyperic.sigar.util.PrintfFormat;
 
-public class AUpTime {
+public class AUpTime extends Hardware {
     private Sigar sigar;
     private Uptime uptime;
     private double[] loadAvg = new double[3];
@@ -67,5 +68,13 @@ public class AUpTime {
             e.printStackTrace();
             return "发生异常";
         }
+    }
+
+    @Override
+    public JSONObject getStatus() {
+        JSONObject result = new JSONObject();
+        result.accumulate("upTime", getUptime());
+        result.accumulate("loadAvg", getLoadAvg());
+        return result;
     }
 }

@@ -7,36 +7,35 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 
-public class AHttpServer {
-    private static String passwd = "";
-    private static int port = 8000;
-    private static String defaultInterface = "status";
-    private static String defaultInterfaceFile = "index.html";
-    public File base = new File("res");
+public class SunHttpServer {
+    private String passwd = "";
+    private int port = 8000;
+    private String defaultInterface = "status";
+    private String defaultInterfaceFile = "index.html";
+    private File base = new File("res");
 
-    public static void main(String[] args) throws IOException {
-        //处理参数
-        HashMap<String, String> uInArgs = new HashMap<>();
-        for (int i = 0; i < args.length; i += 2) {
-            uInArgs.put(args[i].replace("-", ""), args[i + 1]);
-        }
-        if (uInArgs.containsKey("passwd")) {
-            passwd = uInArgs.get("passwd");
-        }
-        if (uInArgs.containsKey("port")) {
-            port = Integer.parseInt(uInArgs.get("port"));
-        }
-        if (uInArgs.containsKey("defaultInterface")) {
-            defaultInterface = uInArgs.get("defaultInterface");
-            defaultInterfaceFile = uInArgs.get("defaultInterfaceFile");
-        }
-        //启动服务器
-        new AHttpServer().init();
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
 
-    private void init() throws IOException {
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setDefaultInterface(String defaultInterface) {
+        this.defaultInterface = defaultInterface;
+    }
+
+    public void setDefaultInterfaceFile(String defaultInterfaceFile) {
+        this.defaultInterfaceFile = defaultInterfaceFile;
+    }
+
+    public void setBase(File base) {
+        this.base = base;
+    }
+
+    public void start() throws IOException {
         System.setProperty("file.encoding", "UTF-8");
         System.setProperty("java.library.path", new File("lib/").getAbsolutePath());
 

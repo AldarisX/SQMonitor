@@ -4,14 +4,15 @@ import com.crocoro.monitor.*;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.rmi.server.ExportException;
 import java.util.HashMap;
+import java.util.zip.GZIPOutputStream;
 
 public class StatusHandler implements HttpHandler {
     private String passwd;
@@ -19,6 +20,7 @@ public class StatusHandler implements HttpHandler {
     private Sigar sigar;
     private CPU cpu;
     private Memory mem;
+    private Swap swap;
     private Network network;
     private Disk disk;
     private AUpTime upTime;
@@ -29,6 +31,7 @@ public class StatusHandler implements HttpHandler {
         upTime = new AUpTime(sigar);
         cpu = new CPU(sigar);
         mem = new Memory(sigar);
+        swap = new Swap(sigar);
         network = new Network(sigar);
         disk = new Disk(sigar);
     }
@@ -50,6 +53,7 @@ public class StatusHandler implements HttpHandler {
             if (command != null || !command.equals("")) {
                 Headers headers = http.getResponseHeaders();
                 headers.add("Content-Type", "application/json; charset=utf-8");
+                headers.add("Content-Encoding", "gzip");
                 headers.add("Server", "Sun HttpServer");
                 http.sendResponseHeaders(200, 0);
                 OutputStream os = http.getResponseBody();
@@ -79,36 +83,33 @@ public class StatusHandler implements HttpHandler {
     }
 
     private void infoMessage(OutputStream os) throws IOException {
-        JSONObject result = new JSONObject();
-        result.accumulate("cpuModel", cpu.getModel());
+        try {
+            JSONObject result = new JSONObject();
+            result.accumulate("cpuModel", cpu.getModel());
 
-        os.write(result.toString().getBytes());
-        os.close();
+            GZIPOutputStream gzip = new GZIPOutputStream(os);
+            gzip.write(result.toString().getBytes());
+            gzip.close();
+            os.close();
+        } catch (ExportException e) {
+            e.printStackTrace();
+        }
     }
 
     private void dynMessage(OutputStream os) throws SigarException, IOException {
         try {
             JSONObject result = new JSONObject();
-            result.accumulate("cpuIdle", cpu.getFree() + "");
-            result.accumulate("loadAvg", upTime.getLoadAvg() + "");
-            result.accumulate("upTime", upTime.getUptime() + "");
-            result.accumulate("freeMem", mem.getFreeMem() + "");
-            result.accumulate("usedMem", mem.getUsedMem() + "");
-            result.accumulate("rx", network.getRx());
-            result.accumulate("tx", network.getTx());
-            //处理磁盘信息
-            JSONArray apiDiskList = new JSONArray();
-            for (String name : disk.getDiskList()) {
-                JSONObject diskInfo = new JSONObject();
-                diskInfo.accumulate("name", name + "");
-                diskInfo.accumulate("read", disk.getRead(name) + "");
-                diskInfo.accumulate("write", disk.getWrite(name) + "");
-                diskInfo.accumulate("usage", disk.getUsage(name) + "");
-                apiDiskList.add(diskInfo);
-            }
-            result.accumulate("diskList", apiDiskList);
 
-            os.write(result.toString().getBytes("UTF-8"));
+            result.accumulate("CPU", cpu.getStatus());
+            result.accumulate("Mem", mem.getStatus());
+            result.accumulate("Swap", swap.getStatus());
+            result.accumulate("Net", network.getStatus());
+            result.accumulate("Disk", disk.getStatus());
+            result.accumulate("Uptime", upTime.getStatus());
+
+            GZIPOutputStream gzip = new GZIPOutputStream(os);
+            gzip.write(result.toString().getBytes());
+            gzip.close();
             os.close();
         } catch (Exception e) {
             e.printStackTrace();

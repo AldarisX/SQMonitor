@@ -1,5 +1,6 @@
 package com.crocoro.monitor;
 
+import net.sf.json.JSONObject;
 import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.Sigar;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 
 import static java.lang.Thread.sleep;
 
-public class Network {
+public class Network extends Hardware {
     static int span = 999;
     String[] cardList;
     long rxBytesP = 0;
@@ -87,5 +88,13 @@ public class Network {
             }
         });
         mo.start();
+    }
+
+    @Override
+    public JSONObject getStatus() {
+        JSONObject result = new JSONObject();
+        result.accumulate("rx", getRx());
+        result.accumulate("tx", getTx());
+        return result;
     }
 }

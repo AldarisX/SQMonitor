@@ -1,10 +1,12 @@
 package com.crocoro.monitor;
 
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 
-public class CPU {
+public class CPU extends Hardware {
     private Sigar sigar;
     private CpuInfo cpuInfo;
 
@@ -29,5 +31,17 @@ public class CPU {
 
     public String getModel() {
         return cpuInfo.getModel();
+    }
+
+    @Override
+    public JSONObject getStatus() {
+        JSONObject result = new JSONObject();
+        try {
+            result.accumulate("idle", getFree());
+            result.accumulate("model", getModel());
+        } catch (SigarException | JSONException e) {
+//            e.printStackTrace();
+        }
+        return result;
     }
 }
