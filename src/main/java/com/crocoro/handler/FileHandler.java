@@ -35,6 +35,9 @@ public class FileHandler implements HttpHandler {
         headers.add("Content-Type", contentType + "; charset=utf-8");
         headers.add("Content-Encoding", "gzip");
         headers.add("Last-modified", lastModified);
+        headers.add("Expires", Integer.MAX_VALUE + "");
+        headers.add("Cache-Control", "public");
+        headers.add("Pragma", "Pragma");
         headers.add("Server", "Sun HttpServer");
         http.sendResponseHeaders(200, 0);
 
@@ -48,6 +51,7 @@ public class FileHandler implements HttpHandler {
             buffer.flip();
             while (buffer.hasRemaining()) {
                 gzip.write(buffer.get());
+//                os.write(buffer.get());
             }
             buffer.clear();
             bytesRead = inFC.read(buffer);
