@@ -1,0 +1,2 @@
+keytool -genkey -alias xmpp -keypass "sqm_aldaris" -keyalg RSA -keysize 1024
+-validity 9125 -keystore "d:\SQM.jks" -storepass "aldaris"
