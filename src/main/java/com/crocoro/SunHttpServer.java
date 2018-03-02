@@ -49,7 +49,7 @@ public class SunHttpServer {
         File[] webFiles = new File(dirName).listFiles();
         for (File file : webFiles) {
             if (file.isFile()) {
-                String fileContext = file.getAbsolutePath().toString().replace(base.getAbsolutePath().toString(), "");
+                String fileContext = file.getAbsolutePath().replace(base.getAbsolutePath(), "");
                 server.createContext(fileContext.replaceAll("\\\\", "/"), new FileHandler(file.getAbsolutePath()));
             } else {
                 addContext(server, file.getAbsolutePath());
