@@ -15,6 +15,8 @@ public class SQMServer {
     }
 
     public void init(String[] args) {
+        boolean http = false;
+        boolean https = false;
         //处理参数
         HashMap<String, String> uInArgs = new HashMap<>();
         for (int i = 0; i < args.length; i += 2) {
@@ -24,10 +26,12 @@ public class SQMServer {
             httpServer.setPasswd(uInArgs.get("passwd"));
             httpsServer.setPasswd(uInArgs.get("passwd"));
         }
-        if (uInArgs.containsKey("httpport")) {
+        if (uInArgs.containsKey("http")) {
+            http = true;
             httpServer.setPort(Integer.parseInt(uInArgs.get("httpport")));
         }
-        if (uInArgs.containsKey("httpsport")) {
+        if (uInArgs.containsKey("https")) {
+            https = true;
             httpsServer.setPort(Integer.parseInt(uInArgs.get("httpsport")));
         }
         if (uInArgs.containsKey("defaultInterface")) {
@@ -39,8 +43,16 @@ public class SQMServer {
         }
 
         try {
-            httpServer.start();
-            httpsServer.start();
+            if (http) {
+                httpServer.start();
+            } else {
+                httpServer = null;
+            }
+            if (https) {
+                httpsServer.start();
+            } else {
+                httpsServer = null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
