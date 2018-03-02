@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import net.sf.json.JSONObject;
 import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -57,23 +56,19 @@ public class StatusHandler implements HttpHandler {
                 headers.add("Server", "Sun HttpServer");
                 http.sendResponseHeaders(200, 0);
                 OutputStream os = http.getResponseBody();
-                try {
-                    switch (command) {
-                        case "info":
-                            infoMessage(os);
-                            break;
-                        case "dyn":
-                            dynMessage(os);
-                            break;
-                        case "shutdown":
-                            shutdown();
-                            break;
-                        default:
-                            os.close();
-                            break;
-                    }
-                } catch (SigarException e) {
-                    e.printStackTrace();
+                switch (command) {
+                    case "info":
+                        infoMessage(os);
+                        break;
+                    case "dyn":
+                        dynMessage(os);
+                        break;
+                    case "shutdown":
+                        shutdown();
+                        break;
+                    default:
+                        os.close();
+                        break;
                 }
             } else {
                 //不传参数就直接关掉
