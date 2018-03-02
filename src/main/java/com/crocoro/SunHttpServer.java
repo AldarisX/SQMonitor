@@ -36,9 +36,6 @@ public class SunHttpServer {
     }
 
     public void start() throws IOException {
-        System.setProperty("file.encoding", "UTF-8");
-        System.setProperty("java.library.path", new File("lib/").getAbsolutePath());
-
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         addContext(server, "res");
         server.createContext("/" + defaultInterface, new FileHandler("res/" + defaultInterfaceFile));
@@ -48,7 +45,7 @@ public class SunHttpServer {
     }
 
     //添加文件上下文
-    private void addContext(HttpServer server, String dirName) throws IOException {
+    private void addContext(HttpServer server, String dirName) {
         File[] webFiles = new File(dirName).listFiles();
         for (File file : webFiles) {
             if (file.isFile()) {

@@ -1,5 +1,6 @@
 package com.crocoro;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -7,6 +8,8 @@ public class SQMServer {
     SunHttpServer httpServer = new SunHttpServer();
 
     public static void main(String[] args) {
+        System.setProperty("file.encoding", "UTF-8");
+        System.setProperty("java.library.path", new File("lib/").getAbsolutePath());
         new SQMServer().init(args);
     }
 
