@@ -47,10 +47,10 @@ public class StatusHandler implements HttpHandler {
             queryList.put(queryKV[0], queryKV[1]);
         }
         //先验证密码
-        if ((passwd).equals(queryList.get("passwd"))) {
+        if (passwd.equals(queryList.get("passwd"))) {
             //判断参数
             String command = queryList.get("command");
-            if (command != null || !command.equals("")) {
+            if (!"".equals(command)) {
                 Headers headers = http.getResponseHeaders();
                 headers.add("Content-Type", "application/json; charset=utf-8");
                 headers.add("Content-Encoding", "gzip");
@@ -64,6 +64,9 @@ public class StatusHandler implements HttpHandler {
                             break;
                         case "dyn":
                             dynMessage(os);
+                            break;
+                        case "shutdown":
+                            shutdown();
                             break;
                         default:
                             os.close();
@@ -96,7 +99,7 @@ public class StatusHandler implements HttpHandler {
         }
     }
 
-    private void dynMessage(OutputStream os) throws SigarException, IOException {
+    private void dynMessage(OutputStream os) {
         try {
             JSONObject result = new JSONObject();
 
@@ -114,5 +117,9 @@ public class StatusHandler implements HttpHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void shutdown() {
+        System.exit(0);
     }
 }
