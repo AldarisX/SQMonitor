@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd ~/SQMonitor/
-nohup setsid java -server -Xmx32M -Xms16M -jar SQMonitor.jar -passwd aldaris -port 8000 > /dev/null > /dev/null 2>&1 &
+nohup setsid java -server -Xmx48M -Xms16M -jar SQMonitor.jar > /dev/null > /dev/null 2>&1 &

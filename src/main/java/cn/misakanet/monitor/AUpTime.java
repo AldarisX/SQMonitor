@@ -1,4 +1,4 @@
-package com.crocoro.monitor;
+package cn.misakanet.monitor;
 
 import net.sf.json.JSONObject;
 import org.hyperic.sigar.Sigar;

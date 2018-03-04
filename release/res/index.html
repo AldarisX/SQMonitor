@@ -4,58 +4,252 @@
     <meta charset="UTF-8">
     <title>监控</title>
     <script src="js/jquery-3.2.1.min.js"></script>
-    <script src="js/index.min.js"></script>
+    <script src="js/Chart.min.js"></script>
+    <script>
+        let passwd;
+        $(document).ready(function () {
+            passwd = prompt("输入密码");
+            pageLoad();
+        });
+
+        function pageLoad() {
+            //默认xy
+            let defLabels = ["00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00"];
+            let defData = [0, 0, 0, 0, 0, 0, 0, 0];
+            //查找图表
+            let cpu_ctx = $("#cpuChart").get(0).getContext("2d");
+            let mem_ctx = $("#memChart").get(0).getContext("2d");
+            let swap_ctx = $("#swapChart").get(0).getContext("2d");
+            let net_ctx = $("#netChart").get(0).getContext("2d");
+            let disk_ctx = $("#diskChart").get(0).getContext("2d");
+            //初始化图表数据
+            let cpuData = {
+                labels: defLabels.slice(0),
+                datasets: [{
+                    label: "CPU使用率 %",
+                    backgroundColor: 'rgba(191, 196, 250, 0.5)',
+                    borderColor: 'rgb(181, 186, 250)',
+                    pointColor: "rgb(171, 176, 250)",
+                    data: defData.slice(0),
+                }]
+            };
+            let memData = {
+                labels: defLabels.slice(0),
+                datasets: [{
+                    label: "物理内存使用 MB",
+                    backgroundColor: 'rgba(214, 232, 244, 0.5)',
+                    borderColor: 'rgb(214, 222, 244)',
+                    pointColor: "rgb(204, 212, 234)",
+                    data: defData.slice(0),
+                }, {
+                    label: "物理内存剩余 MB",
+                    backgroundColor: 'rgba(224, 212, 224, 0.5)',
+                    borderColor: 'rgb(224, 202, 224)',
+                    pointColor: "rgb(214, 192, 214)",
+                    data: defData.slice(0),
+                }]
+            };
+            let swapData = {
+                labels: defLabels.slice(0),
+                datasets: [{
+                    label: "虚拟内存使用 MB",
+                    backgroundColor: 'rgba(204, 222, 234, 0.5)',
+                    borderColor: 'rgb(204, 212, 234)',
+                    pointColor: "rgb(194, 202, 224)",
+                    data: defData.slice(0),
+                }, {
+                    label: "虚拟内存剩余 MB",
+                    backgroundColor: 'rgba(214, 202, 214, 0.5)',
+                    borderColor: 'rgb(214, 192, 214)',
+                    pointColor: "rgb(204, 182, 204)",
+                    data: defData.slice(0),
+                }]
+            };
+            let netData = {
+                labels: defLabels.slice(0),
+                datasets: [{
+                    label: "接受速度 MB/s",
+                    backgroundColor: 'rgba(222, 253, 175, 0.5)',
+                    borderColor: 'rgb(212, 243, 165)',
+                    pointColor: "rgb(192, 223, 155)",
+                    data: defData.slice(0),
+                }, {
+                    label: "发送速度 MB/s",
+                    backgroundColor: 'rgba(252, 243, 195, 0.5)',
+                    borderColor: 'rgb(242, 233, 185)',
+                    pointColor: "rgb(222, 213, 175)",
+                    data: defData.slice(0),
+                }]
+            };
+            let diskData = {
+                labels: defLabels.slice(0),
+                datasets: [{
+                    label: "写入速度 MB/s",
+                    backgroundColor: 'rgba(222, 253, 175, 0.5)',
+                    borderColor: 'rgb(212, 243, 165)',
+                    pointColor: "rgb(192, 223, 155)",
+                    data: defData.slice(0),
+                }, {
+                    label: "读取速度 MB/s",
+                    backgroundColor: 'rgba(252, 243, 195, 0.5)',
+                    borderColor: 'rgb(242, 233, 185)',
+                    pointColor: "rgb(222, 213, 175)",
+                    data: defData.slice(0),
+                }]
+            };
+            let option = {
+                scales: {
+                    yAxes: [{
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                }
+            };
+            //定义图表
+            let cpuChart = new Chart(cpu_ctx, {
+                type: "line",
+                data: cpuData,
+                option: option
+            });
+            let memChart = new Chart(mem_ctx, {
+                type: "line",
+                data: memData,
+                option: option
+            });
+            let swapChart = new Chart(swap_ctx, {
+                type: "line",
+                data: swapData,
+                option: option
+            });
+            let netChart = new Chart(net_ctx, {
+                type: "line",
+                data: netData,
+                bezierCurve: false,
+                option: option
+            });
+            let diskChart = new Chart(disk_ctx, {
+                type: "line",
+                data: diskData,
+                option: option
+            });
+
+
+            statusTimer = setInterval(function () {
+                $.getJSON("/api?command=dyn&passwd=" + passwd, function (data) {
+                    $("#info").css("display", "block");
+                    let now = new Date();
+                    let nowStr = now.getHours() + ":" + fix(now.getMinutes(), 2) + ":" + fix(now.getSeconds(), 2);
+                    //CPU图表数据的刷新
+                    cpuChart.data.labels.push(nowStr);
+                    cpuChart.data.datasets[0].data.push((100 - (data.CPU.idle * 100)));
+                    cpuChart.data.datasets[0].data.splice(0, 1);
+                    cpuChart.data.labels.splice(0, 1);
+                    //内存图表的数据刷新
+                    memChart.data.labels.push(nowStr);
+                    memChart.data.datasets[0].data.push((data.Mem.used / 1024 / 1024).toFixed(2));
+                    memChart.data.datasets[1].data.push((data.Mem.free / 1024 / 1024).toFixed(2));
+                    memChart.data.datasets[0].data.splice(0, 1);
+                    memChart.data.datasets[1].data.splice(0, 1);
+                    memChart.data.labels.splice(0, 1);
+
+                    swapChart.data.labels.push(nowStr);
+                    swapChart.data.datasets[0].data.push((data.Swap.used / 1024 / 1024).toFixed(2));
+                    swapChart.data.datasets[1].data.push((data.Swap.free / 1024 / 1024).toFixed(2));
+                    swapChart.data.datasets[0].data.splice(0, 1);
+                    swapChart.data.datasets[1].data.splice(0, 1);
+                    swapChart.data.labels.splice(0, 1);
+                    //网络图表的数据刷新
+                    netChart.data.labels.push(nowStr);
+                    netChart.data.datasets[0].data.push((data.Net.rx / 1024).toFixed(3));
+                    netChart.data.datasets[1].data.push((data.Net.tx / 1024).toFixed(3));
+                    netChart.data.datasets[0].data.splice(0, 1);
+                    netChart.data.datasets[1].data.splice(0, 1);
+                    netChart.data.labels.splice(0, 1);
+                    //磁盘图表的数据刷新
+                    let diskRead = 0;
+                    let diskWrite = 0;
+                    for (let i = 0; i < data.Disk.length; i++) {
+                        let disk = data.Disk[i];
+                        diskRead += disk.read;
+                        diskWrite += disk.write;
+                    }
+                    diskChart.data.labels.push(nowStr);
+                    diskChart.data.datasets[0].data.push((diskRead / 1024).toFixed(3));
+                    diskChart.data.datasets[1].data.push((diskWrite / 1024).toFixed(3));
+                    diskChart.data.datasets[0].data.splice(0, 1);
+                    diskChart.data.datasets[1].data.splice(0, 1);
+                    diskChart.data.labels.splice(0, 1);
+                    //图表UI的刷新
+                    cpuChart.update();
+                    memChart.update();
+                    swapChart.update();
+                    netChart.update();
+                    diskChart.update();
+
+                    $("#cpuModel").text("CPU型号:" + data.CPU.model);
+                    $("#upTime").text("启动时间:" + data.Uptime.upTime);
+                    $("#loadAvg").text("平均负载" + data.Uptime.loadAvg);
+                    $("#diskList .info").text("");
+                    for (let i = 0; i < data.Disk.length; i++) {
+                        let diskInfo = data.Disk[i];
+                        $("#diskList .info").append("<div>" + diskInfo.name + " 读取:" + parseFloat(diskInfo.read).toFixed(2) + "MB/s 写入:" + parseFloat(diskInfo.write).toFixed(2) + "MB/s 磁盘使用:" + diskInfo.usage + "</div>");
+                    }
+                }).fail(function () {
+                    passwd = prompt("输入密码");
+                    pageLoad();
+                });
+            }, 1000);
+        }
+
+        function fix(num, length) {
+            return ('' + num).length < length ? ((new Array(length + 1)).join('0') + num).slice(-length) : '' + num;
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        li {
+            list-style: none;
+            width: 33%;
+            min-width: 400px;
+            float: left;
+        }
+    </style>
 </head>
 <body>
-<div id="sysInfo">
-    <div>
-        <span>CPU型号:</span><span id="cpuModel"></span>
-    </div>
-</div>
-<div>
-    <div>
-        <span>CPU使用:</span><span id="cpuUseage"></span>
-    </div>
-    <div>
-        <span>平均负载:</span><span id="loadAvg"></span>
-    </div>
-    <div>
-        <span>启动时间:</span><span id="upTime"></span>
-    </div>
-</div>
-<div id="memUsed">
-    <span>物理内存使用:</span><span class="value"></span>
-</div>
-<div id="memFree">
-    <span>物理内存剩余:</span><span class="value"></span>
-</div>
-<div id="memUsage">
-    <span>物理内存使用率:</span><span class="value"></span>
-</div>
-<div id="swapUsed">
-    <span>虚拟内存使用:</span><span class="value"></span>
-</div>
-<div id="swapFree">
-    <span>虚拟内存剩余:</span><span class="value"></span>
-</div>
-<div id="rx">
-    <span>下载:</span><span class="value"></span>
-</div>
-<div id="tx">
-    <span>上载:</span><span class="value"></span>
-</div>
-<div id="diskList">
-    <div>磁盘列表</div>
-    <div class="info">
+<ul>
+    <li>
+        <canvas id="cpuChart"></canvas>
+    </li>
+    <li>
+        <canvas id="memChart"></canvas>
+    </li>
+    <li>
+        <canvas id="swapChart"></canvas>
+    </li>
+    <li>
+        <canvas id="netChart"></canvas>
+    </li>
+    <li>
+        <canvas id="diskChart"></canvas>
+    </li>
+    <li>
+        <div id="info" style="display: none">
+            <div id="cpuModel"></div>
+            <div id="upTime"></div>
+            <div id="loadAvg"></div>
+            <div id="diskList">
+                <div>磁盘列表</div>
+                <div class="info">
 
-    </div>
-</div>
-
-<div>
-    <div>
-        <span>密码</span><input id="passwd" type="text" placeholder="输入密码">
-        <button id="btn_Start" onclick="start()">开始</button>
-    </div>
-</div>
+                </div>
+            </div>
+        </div>
+    </li>
+</ul>
 </body>
 </html>

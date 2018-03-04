@@ -1,7 +1,7 @@
-package com.crocoro;
+package cn.misakanet.server;
 
-import com.crocoro.handler.DefaultPageHandler;
-import com.crocoro.handler.StatusHandler;
+import cn.misakanet.server.handler.DefaultPageHandler;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 
@@ -13,14 +13,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.security.KeyStore;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class SunHttpsServer extends CommonHttpServer {
-    @Override
-    public void start() throws IOException {
-        HttpsServer server = HttpsServer.create(new InetSocketAddress(port), 0);
+    HttpsServer server;
 
+    @Override
+    public void config() throws IOException {
         TrustManager[] tm = {new X509TrustManager() {
             X509Certificate[] x509Certificates;
 
@@ -39,7 +40,9 @@ public class SunHttpsServer extends CommonHttpServer {
                 return x509Certificates;
             }
         }};
+
         try {
+            server = HttpsServer.create(new InetSocketAddress(getPort()), 0);
             KeyStore keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(new File("SQM.jks")), "aldaris".toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -49,13 +52,19 @@ public class SunHttpsServer extends CommonHttpServer {
             ssl.init(kmf.getKeyManagers(), tm, new java.security.SecureRandom());
             server.setHttpsConfigurator(new HttpsConfigurator(ssl));
 
-            addContext(server, "res");
-            server.createContext("/", new DefaultPageHandler("res/" + defaultInterfaceFile));
-            server.createContext("/api", new StatusHandler(passwd));
-            server.start();
-            System.out.println("启动完成 可以访问 https://IP:" + port + "/status 查看");
-        } catch (Exception e) {
+            server.createContext("/", new DefaultPageHandler());
+        } catch (KeyStoreException | KeyManagementException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void start() {
+        server.start();
+        System.out.println("启动完成 可以访问 https://IP:" + getPort() + "/ 查看");
+    }
+
+    public void createContext(String path, HttpHandler handler) {
+        server.createContext(path, handler);
     }
 }

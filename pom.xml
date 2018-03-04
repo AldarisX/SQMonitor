@@ -43,7 +43,7 @@
                     <archive>
                         <addMavenDescriptor>false</addMavenDescriptor>
                         <manifest>
-                            <mainClass>com.crocoro.SQMServer</mainClass>
+                            <mainClass>cn.misakanet.SQMServer</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>

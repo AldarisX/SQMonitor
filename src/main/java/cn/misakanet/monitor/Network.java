@@ -1,4 +1,4 @@
-package com.crocoro.monitor;
+package cn.misakanet.monitor;
 
 import net.sf.json.JSONObject;
 import org.hyperic.sigar.NetInterfaceConfig;
@@ -26,8 +26,6 @@ public class Network extends Hardware {
             start();
         } catch (SigarException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -45,7 +43,7 @@ public class Network extends Hardware {
         return tx;
     }
 
-    public void start() throws SigarException, InterruptedException {
+    public void start() throws SigarException {
         ArrayList<String> lisCardList = new ArrayList<>();
         for (int i = 0; i < cardList.length; i++) {
             NetInterfaceConfig config = sigar.getNetInterfaceConfig(cardList[i]);

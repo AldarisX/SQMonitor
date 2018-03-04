@@ -1,0 +1,13 @@
+{
+  "resource": "res/",
+  "passwd": "aldaris",
+  "defaultPage": "index.html",
+  "http": {
+    "enable": true,
+    "port": 80
+  },
+  "https": {
+    "enable": true,
+    "port": 443
+  }
+}
