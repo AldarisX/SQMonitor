@@ -14,8 +14,8 @@
 
         function pageLoad() {
             //默认xy
-            let defLabels = ["00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00"];
-            let defData = [0, 0, 0, 0, 0, 0, 0, 0];
+            let defLabels = ["00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00", "00:00:00"];
+            let defData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             //查找图表
             let cpu_ctx = $("#cpuChart").get(0).getContext("2d");
             let mem_ctx = $("#memChart").get(0).getContext("2d");
@@ -197,6 +197,7 @@
                         $("#diskList .info").append("<div>" + diskInfo.name + " 读取:" + parseFloat(diskInfo.read).toFixed(2) + "MB/s 写入:" + parseFloat(diskInfo.write).toFixed(2) + "MB/s 磁盘使用:" + diskInfo.usage + "</div>");
                     }
                 }).fail(function () {
+                    window.clearInterval(statusTimer);
                     passwd = prompt("输入密码");
                     pageLoad();
                 });
@@ -210,6 +211,10 @@
     <style>
         body {
             margin: 0;
+        }
+
+        ul {
+            padding: 0;
         }
 
         li {
