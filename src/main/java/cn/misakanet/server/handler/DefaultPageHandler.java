@@ -43,7 +43,7 @@ public class DefaultPageHandler implements HttpHandler {
         headers.add("Last-modified", lastModified);
         headers.add("Expires", Integer.MAX_VALUE + "");
         headers.add("Cache-Control", "public");
-        headers.add("Server", "Sun HttpServer");
+        headers.add("Server", "SunHttpServer");
         http.sendResponseHeaders(200, 0);
 
         OutputStream os = http.getResponseBody();
