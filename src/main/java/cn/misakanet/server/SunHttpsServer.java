@@ -16,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.Executors;
 
 public class SunHttpsServer extends CommonHttpServer {
     HttpsServer server;
@@ -40,9 +41,7 @@ public class SunHttpsServer extends CommonHttpServer {
                 return x509Certificates;
             }
         }};
-
         try {
-            server = HttpsServer.create(new InetSocketAddress(getPort()), 0);
             KeyStore keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(new File("SQM.jks")), "aldaris".toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -50,8 +49,10 @@ public class SunHttpsServer extends CommonHttpServer {
 
             SSLContext ssl = SSLContext.getInstance("TLSv1.2");
             ssl.init(kmf.getKeyManagers(), tm, new java.security.SecureRandom());
-            server.setHttpsConfigurator(new HttpsConfigurator(ssl));
 
+            server = HttpsServer.create(new InetSocketAddress(getPort()), 0);
+            server.setExecutor(Executors.newCachedThreadPool());
+            server.setHttpsConfigurator(new HttpsConfigurator(ssl));
             server.createContext("/", new DefaultPageHandler());
         } catch (KeyStoreException | KeyManagementException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
             e.printStackTrace();

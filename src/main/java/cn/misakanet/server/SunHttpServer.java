@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
 public class SunHttpServer extends CommonHttpServer {
     HttpServer server;
@@ -13,6 +14,7 @@ public class SunHttpServer extends CommonHttpServer {
     @Override
     public void config() throws IOException {
         server = HttpServer.create(new InetSocketAddress(getPort()), 0);
+        server.setExecutor(Executors.newCachedThreadPool());
         server.createContext("/", new DefaultPageHandler());
     }
 
