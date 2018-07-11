@@ -6,10 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import javax.activation.MimetypesFileTypeMap;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Date;
@@ -31,7 +28,6 @@ public class DefaultPageHandler implements HttpHandler {
         }
         if (reqFile.exists()) {
             Headers reqHead = http.getRequestHeaders();
-            System.out.println(Thread.currentThread().getId());
             if (reqHead.containsKey("Range") || ("identity".equals(reqHead.getFirst("Accept-encoding")) && "*/*".equals(reqHead.getFirst("Accept")) && "*".equals(reqHead.getFirst("Accept-charset")))) {
                 fileDownloadHandler(http, reqFile);
             } else {
@@ -52,34 +48,39 @@ public class DefaultPageHandler implements HttpHandler {
         headers.add("Content-Type", contentType + "; charset=utf-8");
         if (canGzip) {
             headers.add("Content-Encoding", "gzip");
+        } else {
+            headers.add("Accept-Ranges", "bytes");
+            headers.add("Content-Length", file.length() + "");
         }
-        headers.add("Content-Length", file.length() + "");
         headers.add("Last-modified", lastModified);
         headers.add("Expires", Integer.MAX_VALUE + "");
         headers.add("Cache-Control", "public");
         headers.add("Server", "SunHttpServer");
+        String eTag = file.getName() + "_" + file.length() + "_" + file.lastModified();
+        headers.add("ETag", eTag);
+
         http.sendResponseHeaders(200, 0);
 
         OutputStream os = http.getResponseBody();
         if (canGzip) {
             os = new GZIPOutputStream(os);
         }
-        FileInputStream fis = new FileInputStream(file);
-        FileChannel fileChannel = fis.getChannel();
+        FileChannel inFC = new RandomAccessFile(file.getAbsoluteFile(), "r").getChannel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
 
-        int data = fileChannel.read(buffer);
-        while (data != -1) {
+        int bytesRead = inFC.read(buffer);
+        while (bytesRead != -1) {
             buffer.flip();
             while (buffer.hasRemaining()) {
-                os.write(buffer.array());
+                os.write(buffer.get());
             }
             buffer.clear();
-            data = fileChannel.read(buffer);
+            bytesRead = inFC.read(buffer);
         }
+        inFC.close();
 
-        fileChannel.close();
         os.close();
+        http.close();
     }
 
     private void fileDownloadHandler(HttpExchange http, File file) throws IOException {
